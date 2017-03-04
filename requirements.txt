@@ -1,0 +1,4 @@
+PyGithub
+pygit2
+pyyaml
+pytest

@@ -1,0 +1,4 @@
+include README.md
+recursive-include scripts *.bat
+recursive-include scripts *.py
+recursive-include schoty_builder *.py
