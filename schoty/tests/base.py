@@ -1,10 +1,14 @@
 from schoty.base import GitRepo
 from schoty.utils import _communicate
 
+TEST_CONFIG = {'user.name': 'Schoty',
+               'user.email':  'contact@schoty.io'}
 
-def _create_repo(base_path, n_commits=1):
+
+def _create_repo(base_path, n_commits=1, config=None):
     name = base_path.name
-    r1 = GitRepo._create(base_path, verbose=False)
+    r1 = GitRepo._create(base_path, verbose=False,
+                         config=config)
     if n_commits >= 1:
         with (r1.base_path / 'README.md').open('w') as fh:
             fh.write('Initial commit\n')

@@ -30,7 +30,7 @@ class GitMonoRepo(dict):
 
     @classmethod
     def clone(cls, repos, base_path, force=False, verbose=False,
-              shallow=True):
+              shallow=True, config=None):
         """ Create a new git repository
         (mostly for testing purposes)
 
@@ -52,7 +52,8 @@ class GitMonoRepo(dict):
         cls : GitRepo
           the git repository object
         """
-        mrepo = GitRepo._create(base_path, force=force, verbose=verbose)
+        mrepo = GitRepo._create(base_path, force=force,
+                                verbose=verbose, config=config)
 
         base_path = mrepo.base_path
 
@@ -78,7 +79,7 @@ class GitMonoRepo(dict):
         for repo_name, repo_path in repos_d.items():
             mrep[repo_name] = GitRepo.clone(repo_path,
                                             base_path / '.repos' / repo_name,
-                                            shallow=shallow)
+                                            shallow=shallow, config=config)
 
         # copy all files to the monorepo:
         for repo_name, repo_path in repos_d.items():
@@ -177,7 +178,7 @@ class GitRepo(object):
 
     @classmethod
     def clone(cls, repo_path, destination_path, force=False, verbose=False,
-              shallow=False):
+              shallow=False, config=None):
         """ Create a new git repository
         (mostly for testing purposes)
 
@@ -218,13 +219,18 @@ class GitRepo(object):
         outs = _check_output(p, cmd=CMD)
         if verbose:
             print(outs)
-        return cls(base_path)
+
+        m = cls(base_path)
+
+        if config is not None:
+            m.set_config(config)
+        return m
 
     def __eq__(self, other):
         return self.log_ == other.log_
 
     @classmethod
-    def _create(cls, base_path, force=False, verbose=False):
+    def _create(cls, base_path, force=False, verbose=False, config=None):
         """ Create a new git repository
         (mostly for testing purposes)
 
@@ -260,7 +266,19 @@ class GitRepo(object):
         outs = _check_output(p)
         if verbose:
             print(outs)
-        return cls(base_path)
+
+        m = cls(base_path)
+
+        if config is not None:
+            m.set_config(config)
+        return m
+
+    def set_config(self, pars):
+        for key, val in pars.items():
+            p = Popen([GIT_CMD, "config", key, f'"{val}"'],
+                      cwd=self.base_path.as_posix(),
+                      stdout=PIPE, stderr=PIPE)
+            _check_output(p)
 
     def __repr__(self):
         return f"<GitRepo [{self.base_path}]>"
