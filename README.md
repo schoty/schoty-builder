@@ -18,3 +18,4 @@ python setup.py develop
  
   - https://github.com/beberlei/composer-monorepo-plugin
   - https://conda-forge.github.io/ (for the Github integration procedures)
+  - https://greenkeeper.io/
