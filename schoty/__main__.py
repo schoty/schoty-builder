@@ -2,13 +2,15 @@ import os
 import sys
 import time
 import argparse
-import shutil
 from subprocess import call
 from ._version import __version__
 
+from .base import GitMonoRepo
 
-def _run(args):
-    pass
+
+def _clone(args):
+
+    mr = GitMonoRepo.clone(args.repo, args.dir, shallow=True)
 
 
 def _info(args):
@@ -35,11 +37,14 @@ def main(args=None, return_parser=False):
                                        description='Create a new monorepo '
                                                    'from exising '
                                                    'repositories.')
-    run_parser.set_defaults(func=_run)
+    run_parser.set_defaults(func=_clone)
 
     # clone parser
     run_parser.add_argument('repo', nargs='+',
-                            help='Path to the repository')
+                            help='Path to the repositories')
+
+    run_parser.add_argument('dir',
+                            help='The output monorepo directory')
 
     info_parser = subparsers.add_parser("info",
                                         description='Show information on the '

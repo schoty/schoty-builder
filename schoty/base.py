@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 from subprocess import Popen, PIPE
 import shutil
+import warnings
 
 from schoty.utils import _communicate
 
@@ -35,8 +36,8 @@ class GitMonoRepo(dict):
 
         Parameters
         ----------
-        repos : dict
-           a dict with as keys repo names and as vales their path
+        repos : list
+           a list of repository paths
         base_path : str
           directory where the repository should be created
         force : str
@@ -51,25 +52,46 @@ class GitMonoRepo(dict):
         cls : GitRepo
           the git repository object
         """
-
         mrepo = GitRepo._create(base_path, force=force, verbose=verbose)
+
+        base_path = mrepo.base_path
 
         (base_path / '.repos').mkdir()
 
         mrep = cls(base_path)
 
+        repos_d = {}
+        for path in repos:
+            name = Path(path).name
+            if name.endswith('.git'):
+                name = name[:-4]
+            if name in repos_d:
+                warnings.warn(f'Repository:\n         {path}\n'
+                              f'already in the monorepo'
+                              f'with the key {name} corresponding to\n'
+                              f'         {repos_d[name]}\n'
+                              f'and will be ingored!')
+            else:
+                repos_d[name] = path
+
         # clone all the upstream repos
-        for repo_name, repo_path in repos.items():
+        for repo_name, repo_path in repos_d.items():
             mrep[repo_name] = GitRepo.clone(repo_path,
                                             base_path / '.repos' / repo_name,
                                             shallow=shallow)
 
         # copy all files to the monorepo:
-        for repo_name, repo_path in repos.items():
+        for repo_name, repo_path in repos_d.items():
             shutil.copytree(mrep[repo_name].base_path, base_path / repo_name)
             shutil.rmtree(base_path / repo_name / '.git')
 
         # add new files to the repo
+        res_add = mrep.monorepo.add(list(repos_d.keys()))
+        res = mrep.monorepo.commit(f'Initial commit ({len(repos)} repos)',
+                                   a=True)
+        if 'files changed' not in res:
+            raise ValueError('Creation of the monorepo failed! \n'
+                             + res_add + res)
 
         return mrep
 
@@ -192,6 +214,9 @@ class GitRepo(object):
 
         p = Popen(CMD, stdout=PIPE, stderr=PIPE)
         outs, errs = _communicate(p)
+        if 'fatal:' in outs + errs:
+            raise ValueError('Repository clone failed\n' +
+                             str(CMD) + '\n' + outs + errs)
         if verbose:
             print(outs + errs)
         return cls(base_path)
@@ -218,6 +243,9 @@ class GitRepo(object):
         cls : GitRepo
           the git repository object
         """
+        if not isinstance(base_path, Path):
+            base_path = Path(base_path)
+
         if base_path.exists():
             if force:
                 shutil.rmtree(base_path)

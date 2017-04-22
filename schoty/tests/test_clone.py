@@ -5,8 +5,7 @@ import shutil
 
 import pytest
 
-from schoty.base import GitRepo, GitMonoRepo
-from schoty.utils import _communicate
+from schoty.base import GitMonoRepo
 from schoty.tests.base import _create_repo
 
 
@@ -29,13 +28,13 @@ def test_create_monorepo(shallow):
         name2 = 'test2'
 
         ur1 = _create_repo(new_dir / name1, n_commits=2)
-        ur2 = _create_repo(new_dir / name2, n_commits=2)
+        ur2 = _create_repo(new_dir / name2, n_commits=3)
 
         # check non shallow clone
         monorepo_path = new_dir / 'mono-repo-0'
 
-        mr = GitMonoRepo.clone({name1: ur1.base_path.as_uri(),
-                                name2: ur2.base_path.as_uri()},
+        mr = GitMonoRepo.clone([ur1.base_path.as_uri(),
+                                ur2.base_path.as_uri()],
                                monorepo_path,
                                shallow=shallow)
         if shallow:
@@ -46,6 +45,11 @@ def test_create_monorepo(shallow):
             # the cloned repo must exactly match
             assert ur1 == mr[name1]
             assert ur2 == mr[name2]
+
+        # make sure that the new folders are created in the monorepo
+        for name in mr:
+            assert (mr.base_path / name).exists()
+        assert mr.monorepo.n_commits_ == 1
 
     finally:
         if 'SCHOTY_KEEP_TEST_DATA' not in os.environ:
