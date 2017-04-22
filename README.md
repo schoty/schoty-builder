@@ -1,6 +1,6 @@
 # Schoty
 
-[![Build Status](https://travis-ci.org/schoty/schoty-builder.svg?branch=master)](https://travis-ci.org/schoty/schoty-builder)
+[![Build Status](https://travis-ci.org/schoty/schoty.svg?branch=master)](https://travis-ci.org/schoty/schoty)
 
 
 A monorepo builder and synchronisation engine
