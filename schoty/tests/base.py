@@ -11,7 +11,6 @@ def _create_repo(base_path, n_commits=1):
         out1 = r1.add([r1.base_path / 'README.md'])
         assert r1.n_commits_ == 0
         out2 = r1.commit(f'Initial commit ({name})')
-        print(out1 + out2)
     if n_commits >= 2:
         for i_commit in range(1, n_commits):
             with (r1.base_path / 'README.md').open('w') as fh:

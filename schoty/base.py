@@ -4,7 +4,7 @@ from subprocess import Popen, PIPE
 import shutil
 import warnings
 
-from schoty.utils import _communicate
+from schoty.utils import _check_output
 
 GIT_CMD = shutil.which('git')
 
@@ -138,8 +138,7 @@ class GitRepo(object):
             CMD.insert(2, '-a')
         p = Popen(CMD, cwd=self.base_path.as_posix(),
                   stdout=PIPE, stderr=PIPE)
-        outs, errs = _communicate(p)
-        return outs + errs
+        return _check_output(p, cmd=CMD)
 
     def add(self, files):
         """ Call `git add` on the provided files
@@ -153,24 +152,27 @@ class GitRepo(object):
         CMD += [f'{el}' for el in files]
         p = Popen(CMD, cwd=self.base_path.as_posix(),
                   stdout=PIPE, stderr=PIPE)
-        outs, errs = _communicate(p)
-        return outs + errs
+        return _check_output(p, cmd=CMD)
 
     @property
     def log_(self):
         """ Return the log of the current directory"""
         p = Popen([GIT_CMD, "log"], cwd=self.base_path.as_posix(),
                   stdout=PIPE, stderr=PIPE)
-        outs, errs = _communicate(p)
-        return outs + errs
+        return _check_output(p, cmd=[GIT_CMD, "log"])
 
     @property
     def n_commits_(self):
         """ Return the number of commits """
         n = 0
-        for line in self.log_.splitlines():
-            if re.match('^commit\s[0-9a-f]+\s*$', line):
-                n += 1
+        try:
+            log = self.log_
+            for line in log.splitlines():
+                if re.match('^commit\s[0-9a-f]+\s*$', line):
+                    n += 1
+        except RuntimeError:
+            pass
+
         return n
 
     @classmethod
@@ -213,12 +215,9 @@ class GitRepo(object):
         CMD = [GIT_CMD, "clone"] + CMD + [repo_path, destination_path]
 
         p = Popen(CMD, stdout=PIPE, stderr=PIPE)
-        outs, errs = _communicate(p)
-        if 'fatal:' in outs + errs:
-            raise ValueError('Repository clone failed\n' +
-                             str(CMD) + '\n' + outs + errs)
+        outs = _check_output(p, cmd=CMD)
         if verbose:
-            print(outs + errs)
+            print(outs)
         return cls(base_path)
 
     def __eq__(self, other):
@@ -258,9 +257,9 @@ class GitRepo(object):
 
         p = Popen([GIT_CMD, "init"], cwd=base_path.as_posix(),
                   stdout=PIPE, stderr=PIPE)
-        outs, errs = _communicate(p)
+        outs = _check_output(p)
         if verbose:
-            print(outs + errs)
+            print(outs)
         return cls(base_path)
 
     def __repr__(self):
