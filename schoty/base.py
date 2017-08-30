@@ -1,8 +1,9 @@
+import os
 import re
-from pathlib import Path
-from subprocess import Popen, PIPE
 import shutil
 import warnings
+from pathlib import Path
+from subprocess import PIPE, Popen
 
 from schoty.utils import _check_output
 
@@ -154,6 +155,14 @@ class GitRepo(object):
         p = Popen(CMD, cwd=self.base_path.as_posix(),
                   stdout=PIPE, stderr=PIPE)
         return _check_output(p, cmd=CMD)
+
+    def pull(self, args=None):
+        if args is None:
+            args = []
+
+        p = Popen([GIT_CMD, "pull"], cwd=os.fpath(self.base_path.as_posix()),
+                  stdout=PIPE, stderr=PIPE)
+        outs = _check_output(p)
 
     @property
     def log_(self):

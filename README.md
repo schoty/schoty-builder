@@ -44,7 +44,6 @@ or
 schoty gather 
 ```
 
-
 4. Any of the following commands (`pull`, `push`, `fetch`) will be applied to local repositories under
 `new-monorepo/.repos/`
 
@@ -52,6 +51,9 @@ schoty gather
 schoty <command>
 ```
 
+## Limitations
+
+ * Git history rewrites are not supported 
 
 ## Related projects
  
