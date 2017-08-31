@@ -3,16 +3,18 @@
 [![Build Status](https://travis-ci.org/schoty/schoty.svg?branch=master)](https://travis-ci.org/schoty/schoty)
 
 
-A monorepo builder and synchronisation engine
+A monorepo builder and synchronisation engine 
 
 This package contains the builder for the schoty project. It provides a unified view for multiple user-repositories and implements a synchronisation mechanism between the monorepo and the individual repositories.
 
+**Warning:** this package is an early developpement / prototype phase
+
 ## Installation notes
 
-Schoty requires Python 3.6 and can be installed with,
+Schoty requires git and Python 3.6 and can be installed with,
 
 ```bash
-pip install -e .
+pip install git+https://github.com/schoty/schoty.git
 ```
 
 ## Quick start guide

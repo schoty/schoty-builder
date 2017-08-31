@@ -23,6 +23,7 @@ def _info(args, unknown_args):
     print(f'Schoty - version {__version__}')
 
 def _pull(args, unknown_args):
+    pass
 
 
 # Allow to propagate formatter_class to subparsers

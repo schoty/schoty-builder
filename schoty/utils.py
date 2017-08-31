@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
-from subprocess import Popen, PIPE
 import shutil
+from subprocess import PIPE, Popen
 
 GIT_CMD = shutil.which('git')
 
