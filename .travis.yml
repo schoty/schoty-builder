@@ -10,7 +10,7 @@ before_install:
 
 install:
     - conda config --append channels conda-forge
-    - conda create -q -n schoty-env --file requirements.txt python=3.6 --yes
+    - conda create -q -n schoty-env git pytest python=3.6 --yes
     - source activate schoty-env
     - pip install .
 
